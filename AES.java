@@ -1,10 +1,12 @@
 import java.io.*;
+import java.util.Arrays;
 
 
 public class AES {
 
 	public static int[][] cryptMatrix = new int[4][4]; 
 	public static int[][] roundKey;
+	public static int idx = 0; 
 
 	public static int [][] sBox = new int [] []{ 
 		{0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76},
@@ -62,37 +64,64 @@ public class AES {
 		57,  75, 221, 124, 132, 151, 162, 253,  28,  36, 108, 180, 199,  82, 246,   1};
 
 
+	public static int[][] rcon = {
+		{0x01, 00, 00, 00},
+		{0x02, 00, 00, 00},
+		{0x04, 00, 00, 00},
+		{0x08, 00, 00, 00},
+		{0x10, 00, 00, 00},
+		{0x20, 00, 00, 00},
+		{0x40, 00, 00, 00},
+		{0x80, 00, 00, 00},
+		{0x1b, 00, 00, 00},
+		{0x36, 00, 00, 00}
+	};
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
 		cryptMatrix = setUpArray(args[2]); 
 		roundKey = setUpArray (args[1]); 
 		//java AES option keyFile inputFile
-			printMatrix();
+			System.out.println("Original Matrix:"); 
+			printMatrix(cryptMatrix);
+			System.out.println(); 
+			
+			System.out.println("Original RoundKey: ");
+			printMatrix(roundKey); 
 			System.out.println(); 
 
 			int i = 0; 
 			while (i < 9) {
+				System.out.println( "New Round " +(i + 1)); 
 				runRounds();
 				i++; 
-			}
+			} 
 	}
 	
 	private static void runRounds() {
+		System.out.println("SubByters Results: " );
 		subBytes();
-		printMatrix();
+		printMatrix(cryptMatrix);
 		System.out.println(); 
 
+		System.out.println("ShiftRows Results: " );
 		shiftRows();
-		printMatrix();
+		printMatrix(cryptMatrix);
 		System.out.println();
 
+		System.out.println("MixColumns Results: " );
 		mixColumns(); 
-		printMatrix(); 
+		printMatrix(cryptMatrix); 
 		System.out.println(); 
 
+		System.out.println("Add Round Key Results: " );
 		addRoundKey(); 
-		printMatrix(); 
+		printMatrix(cryptMatrix); 
+		System.out.println();
+		
+		System.out.println("New RoundKey Generated: "); 
+		printMatrix(roundKey); 
 		System.out.println(); 
 	}
 	
@@ -121,6 +150,7 @@ public class AES {
 				}
 				line = in.readLine();
 			}
+			in.close(); 
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -134,12 +164,12 @@ public class AES {
 
 	//print matrix
 	//used for debugging purposes
-	public static void printMatrix () {
-		for (int i = 0; i<cryptMatrix.length; i++)
+	public static void printMatrix (int[][] matrix) {
+		for (int i = 0; i<matrix.length; i++)
 		{
-			for (int j =0; j<cryptMatrix[i].length; j++)
+			for (int j =0; j<matrix[i].length; j++)
 			{
-				System.out.print(Integer.toHexString(cryptMatrix[i][j])+ " ");
+				System.out.print(Integer.toHexString(matrix[i][j])+ " ");
 			}
 			System.out.println();
 		}
@@ -272,6 +302,61 @@ public class AES {
 				cryptMatrix[j][i] = cryptMatrix[j][i] ^ roundKey[j][i]; 
 			} 
 		}
+		
+		updateRoundKey(); 
 
+	}
+	
+	//updates the RoundKey
+	public static void updateRoundKey(){
+		//word = last column
+		//rotate word
+		int[] rotWord = rotateWord(); 
+		
+		//subbytes word
+		rotWord = subBytesWord(rotWord);
+		
+		//XOR first column with word and RCON
+		//then XOR next column with result
+		int[] rconWord = rcon[idx]; 
+		
+		for (int i = 0; i < rconWord.length; i++)
+			System.out.print(Integer.toHexString(rconWord[i])+ " "); 
+		System.out.println(); 
+		
+		//THIS LOOP IS MESSED UP!!! I MIGHT BE OVERWRITING ROTWORD BEFORE i USED ALL OF IT
+		for (int i = 0; i < roundKey[0].length; i++){
+			for (int j = 0; j < roundKey.length; j++){
+				if (i == 0) roundKey[j][i] = roundKey[j][i] ^ rotWord[j]^ rconWord[j];
+				else roundKey[j][i] = roundKey[j][i] ^ rotWord[j]; 
+				rotWord[j] = roundKey[j][i];  
+			} 
+		}
+		 idx++; 
+	}
+	
+	private static int[] subBytesWord(int[] rotWord) {
+		int row = 0;
+
+		while (row < (rotWord.length))
+		{
+			int firstdigit = (rotWord[row]>>4)&0xF;
+			int lastdigit = rotWord[row]&0xF;
+
+			rotWord[row] = sBox[firstdigit][lastdigit]; 
+			row++; 
+		}
+		return rotWord;
+	}
+
+	private static int[] rotateWord(){
+		int[] rotWord = new int[4];
+		
+		for (int i = 0; i < roundKey.length; i++) {
+			if (i <3) rotWord[i] = roundKey[i+1][3]; 
+			else rotWord[i] = roundKey[0][3]; 
+		}
+ 
+		return rotWord; 
 	}
 }
