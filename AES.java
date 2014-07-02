@@ -6,7 +6,8 @@ public class AES {
 
 	public static int[][] cryptMatrix = new int[4][4]; 
 	public static int[][] roundKey;
-	public static int idx = 0; 
+	public static int rconIdx = 0; 
+	public static int keyIdx = 0; 
 
 	public static int [][] sBox = new int [] []{ 
 		{0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76},
@@ -65,40 +66,112 @@ public class AES {
 
 
 	public static int[][] rcon = {
-		{0x01, 00, 00, 00},
-		{0x02, 00, 00, 00},
-		{0x04, 00, 00, 00},
-		{0x08, 00, 00, 00},
-		{0x10, 00, 00, 00},
-		{0x20, 00, 00, 00},
-		{0x40, 00, 00, 00},
-		{0x80, 00, 00, 00},
-		{0x1b, 00, 00, 00},
-		{0x36, 00, 00, 00}
-	};
-	
+		{0x01, 00, 00, 00}, {0x02, 00, 00, 00}, {0x04, 00, 00, 00}, {0x08, 00, 00, 00}, 
+		{0x10, 00, 00, 00}, {0x20, 00, 00, 00}, {0x40, 00, 00, 00}, {0x80, 00, 00, 00}, 
+		{0x1b, 00, 00, 00}, {0x36, 00, 00, 00}, {0x6c, 00, 00, 00}, {0xd8, 00, 00, 00}, 
+		{0xab, 00, 00, 00}, {0x4d, 00, 00, 00}, {0x9a, 00, 00, 00}, {0x2f, 00, 00, 00}, 
+		{0x5e, 00, 00, 00}, {0xbc, 00, 00, 00}, {0x63, 00, 00, 00}, {0xc6, 00, 00, 00}, 
+		{0x97, 00, 00, 00}, {0x35, 00, 00, 00}, {0x6a, 00, 00, 00}, {0xd4, 00, 00, 00}, 
+		{0xb3, 00, 00, 00}, {0x7d, 00, 00, 00}, {0xfa, 00, 00, 00}, {0xef, 00, 00, 00}, 
+		{0xc5, 00, 00, 00}, {0x91, 00, 00, 00}, {0x39, 00, 00, 00}, {0x72, 00, 00, 00}, 
+		{0xe4, 00, 00, 00}, {0xd3, 00, 00, 00}, {0xbd, 00, 00, 00}, {0x61, 00, 00, 00}, 
+		{0xc2, 00, 00, 00}, {0x9f, 00, 00, 00}, {0x25, 00, 00, 00}, {0x4a, 00, 00, 00}, 
+		{0x94, 00, 00, 00}, {0x33, 00, 00, 00}, {0x66, 00, 00, 00}, {0xcc, 00, 00, 00}, 
+		{0x83, 00, 00, 00}, {0x1d, 00, 00, 00}, {0x3a, 00, 00, 00}, {0x74, 00, 00, 00}, 
+		{0xe8, 00, 00, 00}, {0xcb, 00, 00, 00}, {0x8d, 00, 00, 00}, {0x01, 00, 00, 00}, 
+		{0x02, 00, 00, 00}, {0x04, 00, 00, 00}, {0x08, 00, 00, 00}, {0x10, 00, 00, 00}, 
+		{0x20, 00, 00, 00}, {0x40, 00, 00, 00}, {0x80, 00, 00, 00}, {0x1b, 00, 00, 00}, 
+		{0x36, 00, 00, 00}, {0x6c, 00, 00, 00}, {0xd8, 00, 00, 00}, {0xab, 00, 00, 00}, 
+		{0x4d, 00, 00, 00}, {0x9a, 00, 00, 00}, {0x2f, 00, 00, 00}, {0x5e, 00, 00, 00}, 
+		{0xbc, 00, 00, 00}, {0x63, 00, 00, 00}, {0xc6, 00, 00, 00}, {0x97, 00, 00, 00}, 
+		{0x35, 00, 00, 00}, {0x6a, 00, 00, 00}, {0xd4, 00, 00, 00}, {0xb3, 00, 00, 00}, 
+		{0x7d, 00, 00, 00}, {0xfa, 00, 00, 00}, {0xef, 00, 00, 00}, {0xc5, 00, 00, 00}, 
+		{0x91, 00, 00, 00}, {0x39, 00, 00, 00}, {0x72, 00, 00, 00}, {0xe4, 00, 00, 00}, 
+		{0xd3, 00, 00, 00}, {0xbd, 00, 00, 00}, {0x61, 00, 00, 00}, {0xc2, 00, 00, 00}, 
+		{0x9f, 00, 00, 00}, {0x25, 00, 00, 00}, {0x4a, 00, 00, 00}, {0x94, 00, 00, 00}, 
+		{0x33, 00, 00, 00}, {0x66, 00, 00, 00}, {0xcc, 00, 00, 00}, {0x83, 00, 00, 00}, 
+		{0x1d, 00, 00, 00}, {0x3a, 00, 00, 00}, {0x74, 00, 00, 00}, {0xe8, 00, 00, 00}, 
+		{0xcb, 00, 00, 00}, {0x8d, 00, 00, 00}, {0x01, 00, 00, 00}, {0x02, 00, 00, 00}, 
+		{0x04, 00, 00, 00}, {0x08, 00, 00, 00}, {0x10, 00, 00, 00}, {0x20, 00, 00, 00}, 
+		{0x40, 00, 00, 00}, {0x80, 00, 00, 00}, {0x1b, 00, 00, 00}, {0x36, 00, 00, 00}, 
+		{0x6c, 00, 00, 00}, {0xd8, 00, 00, 00}, {0xab, 00, 00, 00}, {0x4d, 00, 00, 00}, 
+		{0x9a, 00, 00, 00}, {0x2f, 00, 00, 00}, {0x5e, 00, 00, 00}, {0xbc, 00, 00, 00}, 
+		{0x63, 00, 00, 00}, {0xc6, 00, 00, 00}, {0x97, 00, 00, 00}, {0x35, 00, 00, 00}, 
+		{0x6a, 00, 00, 00}, {0xd4, 00, 00, 00}, {0xb3, 00, 00, 00}, {0x7d, 00, 00, 00}, 
+		{0xfa, 00, 00, 00}, {0xef, 00, 00, 00}, {0xc5, 00, 00, 00}, {0x91, 00, 00, 00}, 
+		{0x39, 00, 00, 00}, {0x72, 00, 00, 00}, {0xe4, 00, 00, 00}, {0xd3, 00, 00, 00}, 
+		{0xbd, 00, 00, 00}, {0x61, 00, 00, 00}, {0xc2, 00, 00, 00}, {0x9f, 00, 00, 00}, 
+		{0x25, 00, 00, 00}, {0x4a, 00, 00, 00}, {0x94, 00, 00, 00}, {0x33, 00, 00, 00}, 
+		{0x66, 00, 00, 00}, {0xcc, 00, 00, 00}, {0x83, 00, 00, 00}, {0x1d, 00, 00, 00}, 
+		{0x3a, 00, 00, 00}, {0x74, 00, 00, 00}, {0xe8, 00, 00, 00}, {0xcb, 00, 00, 00}, 
+		{0x8d, 00, 00, 00}, {0x01, 00, 00, 00}, {0x02, 00, 00, 00}, {0x04, 00, 00, 00}, 
+		{0x08, 00, 00, 00}, {0x10, 00, 00, 00}, {0x20, 00, 00, 00}, {0x40, 00, 00, 00}, 
+		{0x80, 00, 00, 00}, {0x1b, 00, 00, 00}, {0x36, 00, 00, 00}, {0x6c, 00, 00, 00}, 
+		{0xd8, 00, 00, 00}, {0xab, 00, 00, 00}, {0x4d, 00, 00, 00}, {0x9a, 00, 00, 00}, 
+		{0x2f, 00, 00, 00}, {0x5e, 00, 00, 00}, {0xbc, 00, 00, 00}, {0x63, 00, 00, 00}, 
+		{0xc6, 00, 00, 00}, {0x97, 00, 00, 00}, {0x35, 00, 00, 00}, {0x6a, 00, 00, 00}, 
+		{0xd4, 00, 00, 00}, {0xb3, 00, 00, 00}, {0x7d, 00, 00, 00}, {0xfa, 00, 00, 00}, 
+		{0xef, 00, 00, 00}, {0xc5, 00, 00, 00}, {0x91, 00, 00, 00}, {0x39, 00, 00, 00}, 
+		{0x72, 00, 00, 00}, {0xe4, 00, 00, 00}, {0xd3, 00, 00, 00}, {0xbd, 00, 00, 00}, 
+		{0x61, 00, 00, 00}, {0xc2, 00, 00, 00}, {0x9f, 00, 00, 00}, {0x25, 00, 00, 00}, 
+		{0x4a, 00, 00, 00}, {0x94, 00, 00, 00}, {0x33, 00, 00, 00}, {0x66, 00, 00, 00}, 
+		{0xcc, 00, 00, 00}, {0x83, 00, 00, 00}, {0x1d, 00, 00, 00}, {0x3a, 00, 00, 00}, 
+		{0x74, 00, 00, 00}, {0xe8, 00, 00, 00}, {0xcb, 00, 00, 00}, {0x8d, 00, 00, 00}, 
+		{0x01, 00, 00, 00}, {0x02, 00, 00, 00}, {0x04, 00, 00, 00}, {0x08, 00, 00, 00}, 
+		{0x10, 00, 00, 00}, {0x20, 00, 00, 00}, {0x40, 00, 00, 00}, {0x80, 00, 00, 00}, 
+		{0x1b, 00, 00, 00}, {0x36, 00, 00, 00}, {0x6c, 00, 00, 00}, {0xd8, 00, 00, 00}, 
+		{0xab, 00, 00, 00}, {0x4d, 00, 00, 00}, {0x9a, 00, 00, 00}, {0x2f, 00, 00, 00}, 
+		{0x5e, 00, 00, 00}, {0xbc, 00, 00, 00}, {0x63, 00, 00, 00}, {0xc6, 00, 00, 00}, 
+		{0x97, 00, 00, 00}, {0x35, 00, 00, 00}, {0x6a, 00, 00, 00}, {0xd4, 00, 00, 00}, 
+		{0xb3, 00, 00, 00}, {0x7d, 00, 00, 00}, {0xfa, 00, 00, 00}, {0xef, 00, 00, 00}, 
+		{0xc5, 00, 00, 00}, {0x91, 00, 00, 00}, {0x39, 00, 00, 00}, {0x72, 00, 00, 00}, 
+		{0xe4, 00, 00, 00}, {0xd3, 00, 00, 00}, {0xbd, 00, 00, 00}, {0x61, 00, 00, 00}, 
+		{0xc2, 00, 00, 00}, {0x9f, 00, 00, 00}, {0x25, 00, 00, 00}, {0x4a, 00, 00, 00}, 
+		{0x94, 00, 00, 00}, {0x33, 00, 00, 00}, {0x66, 00, 00, 00}, {0xcc, 00, 00, 00}, 
+		{0x83, 00, 00, 00}, {0x1d, 00, 00, 00}, {0x3a, 00, 00, 00}, {0x74, 00, 00, 00}, 
+		{0xe8, 00, 00, 00}, {0xcb, 00, 00, 00}, {0x8d, 00, 00, 00}};
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		cryptMatrix = setUpArray(args[2]); 
-		roundKey = setUpArray (args[1]); 
+		cryptMatrix = setUpArray(args[2], 4); 
+		roundKey = setUpArray (args[1], 8); 
 		//java AES option keyFile inputFile
-			System.out.println("Original Matrix:"); 
-			printMatrix(cryptMatrix);
-			System.out.println(); 
-			
-			System.out.println("Original RoundKey: ");
-			printMatrix(roundKey); 
-			System.out.println(); 
+		System.out.println("Original Matrix:"); 
+		printMatrix(cryptMatrix);
+		System.out.println(); 
 
-			int i = 0; 
-			while (i < 9) {
-				System.out.println( "New Round " +(i + 1)); 
-				runRounds();
-				i++; 
-			} 
+		System.out.println("Original RoundKey: ");
+		printMatrix(roundKey); 
+		System.out.println(); 
+
+		int i = 0; 
+		while (i < 13) {
+			System.out.println( "New Round " +(i + 1)); 
+			runRounds();
+			i++; 
+		} 
+
+		System.out.println("SubByters Results: " );
+		subBytes();
+		printMatrix(cryptMatrix);
+		System.out.println(); 
+
+		System.out.println("ShiftRows Results: " );
+		shiftRows();
+		printMatrix(cryptMatrix);
+		System.out.println(); 
+
+		System.out.println("Add Round Key Results: " );
+		addRoundKey(); 
+		printMatrix(cryptMatrix); 
+		System.out.println();
+
+		System.out.println("New RoundKey Generated: "); 
+		printMatrix(roundKey); 
+		System.out.println(); 
 	}
-	
+
 	private static void runRounds() {
 		System.out.println("SubByters Results: " );
 		subBytes();
@@ -119,15 +192,15 @@ public class AES {
 		addRoundKey(); 
 		printMatrix(cryptMatrix); 
 		System.out.println();
-		
+
 		System.out.println("New RoundKey Generated: "); 
 		printMatrix(roundKey); 
 		System.out.println(); 
 	}
-	
-	private static int[][] setUpArray(String file) {
+
+	private static int[][] setUpArray(String file, int size) {
 		BufferedReader in;
-		int [][] making = new int[4][4]; 
+		int [][] making = new int[4][size]; 
 		try {
 			in = new BufferedReader(new FileReader(file));
 			String line = in.readLine();
@@ -138,15 +211,15 @@ public class AES {
 				int row = 0;
 				for (int i = 0; line != null && i<line.length(); i=i +2)
 				{
-					if (col == 4)
+					if (row == 4)
 					{
-						col = 0;
-						row++;
+						row = 0;
+						col++;
 					}
 					int hex = Integer.decode("0x"+line.substring(i,i+2));
 
 					making[row][col] = hex;
-					col++;
+					row++; 
 				}
 				line = in.readLine();
 			}
@@ -158,21 +231,30 @@ public class AES {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return making; 
 	}
 
 	//print matrix
 	//used for debugging purposes
 	public static void printMatrix (int[][] matrix) {
-		for (int i = 0; i<matrix.length; i++)
+		
+		for (int i = 0; i<matrix[0].length; i++)
 		{
-			for (int j =0; j<matrix[i].length; j++)
+			for (int j =0; j<matrix.length; j++)
 			{
-				System.out.print(Integer.toHexString(matrix[i][j])+ " ");
+				System.out.print(Integer.toHexString(matrix[j][i]));
 			}
-			System.out.println();
 		}
+		System.out.println(); 
+//		for (int i = 0; i<matrix.length; i++)
+//		{
+//			for (int j =0; j<matrix[i].length; j++)
+//			{
+//				System.out.print(Integer.toHexString(matrix[i][j])+ " ");
+//			}
+//			System.out.println();
+//		}
 	}
 	//subBytes
 	public static void subBytes(){
@@ -243,7 +325,7 @@ public class AES {
 
 	//mixColumns
 	public static void mixColumns() {
-		
+
 		for (int i = 0; i < cryptMatrix.length; i++){
 			mixColumn2(i); 
 		}
@@ -299,42 +381,38 @@ public class AES {
 		updateRoundKey(); 
 		for (int i = 0; i < cryptMatrix[0].length; i++){
 			for (int j = 0; j < cryptMatrix.length; j++){
-				cryptMatrix[j][i] = cryptMatrix[j][i] ^ roundKey[j][i]; 
+				cryptMatrix[j][i] = cryptMatrix[j][i] ^ roundKey[j][i+keyIdx]; 
 			} 
 		}
-		
-		
+
+
 
 	}
-	
+
 	//updates the RoundKey
 	public static void updateRoundKey(){
 		//word = last column
 		//rotate word
 		int[] rotWord = rotateWord(); 
-		
+
 		//subbytes word
 		rotWord = subBytesWord(rotWord);
-		
+
 		//XOR first column with word and RCON
 		//then XOR next column with result
-		int[] rconWord = rcon[idx]; 
-		
-//		for (int i = 0; i < rconWord.length; i++)
-//			System.out.print(Integer.toHexString(rconWord[i])+ " "); 
-//		System.out.println(); 
-		
-		//THIS LOOP IS MESSED UP!!! I MIGHT BE OVERWRITING ROTWORD BEFORE i USED ALL OF IT
-		for (int i = 0; i < roundKey[0].length; i++){
+		int[] rconWord = rcon[rconIdx]; 
+
+		for (int i = keyIdx; i < keyIdx+4; i++){
 			for (int j = 0; j < roundKey.length; j++){
 				if (i == 0) roundKey[j][i] = roundKey[j][i] ^ rotWord[j] ^ rconWord[j];
 				else roundKey[j][i] = roundKey[j][i] ^ rotWord[j]; 
 				rotWord[j] = roundKey[j][i];  
 			} 
 		}
-		 idx++; 
+		rconIdx++; 
+		keyIdx = (keyIdx == 0) ? 4:0;
 	}
-	
+
 	private static int[] subBytesWord(int[] rotWord) {
 		int row = 0;
 
@@ -351,12 +429,12 @@ public class AES {
 
 	private static int[] rotateWord(){
 		int[] rotWord = new int[4];
-		
-		for (int i = 0; i < roundKey.length; i++) {
+
+		for (int i = keyIdx; i < roundKey.length; i++) {
 			if (i <3) rotWord[i] = roundKey[i+1][3]; 
 			else rotWord[i] = roundKey[0][3]; 
 		}
- 
+
 		return rotWord; 
 	}
 }
