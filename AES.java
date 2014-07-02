@@ -296,14 +296,14 @@ public class AES {
 
 	//addRoundKey
 	public static void addRoundKey(){
-
+		updateRoundKey(); 
 		for (int i = 0; i < cryptMatrix[0].length; i++){
 			for (int j = 0; j < cryptMatrix.length; j++){
 				cryptMatrix[j][i] = cryptMatrix[j][i] ^ roundKey[j][i]; 
 			} 
 		}
 		
-		updateRoundKey(); 
+		
 
 	}
 	
@@ -320,14 +320,14 @@ public class AES {
 		//then XOR next column with result
 		int[] rconWord = rcon[idx]; 
 		
-		for (int i = 0; i < rconWord.length; i++)
-			System.out.print(Integer.toHexString(rconWord[i])+ " "); 
-		System.out.println(); 
+//		for (int i = 0; i < rconWord.length; i++)
+//			System.out.print(Integer.toHexString(rconWord[i])+ " "); 
+//		System.out.println(); 
 		
 		//THIS LOOP IS MESSED UP!!! I MIGHT BE OVERWRITING ROTWORD BEFORE i USED ALL OF IT
 		for (int i = 0; i < roundKey[0].length; i++){
 			for (int j = 0; j < roundKey.length; j++){
-				if (i == 0) roundKey[j][i] = roundKey[j][i] ^ rotWord[j]^ rconWord[j];
+				if (i == 0) roundKey[j][i] = roundKey[j][i] ^ rotWord[j] ^ rconWord[j];
 				else roundKey[j][i] = roundKey[j][i] ^ rotWord[j]; 
 				rotWord[j] = roundKey[j][i];  
 			} 
