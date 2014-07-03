@@ -26,7 +26,7 @@ public class AES {
 		{0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf},
 		{0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16}
 	};
-	   public static int [][] inverseSBox = new int [] [] {
+	public static int [][] inverseSBox = new int [] [] {
 	    {0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb},
 	    {0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb},
 	    {0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e},
@@ -44,7 +44,6 @@ public class AES {
 	    {0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61},
 	    {0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d}
 	    };
-
 	final static int[] LogTable = {
 		0,   0,  25,   1,  50,   2,  26, 198,  75, 199,  27, 104,  51, 238, 223,   3, 
 		100,   4, 224,  14,  52, 141, 129, 239,  76, 113,   8, 200, 248, 105,  28, 193, 
@@ -62,7 +61,6 @@ public class AES {
 		83,  57, 132,  60,  65, 162, 109,  71,  20,  42, 158,  93,  86, 242, 211, 171, 
 		68,  17, 146, 217,  35,  32,  46, 137, 180, 124, 184,  38, 119, 153, 227, 165, 
 		103,  74, 237, 222, 197,  49, 254,  24,  13,  99, 140, 128, 192, 247, 112,   7};
-
 	final static int[] AlogTable = {
 		1,   3,   5,  15,  17,  51,  85, 255,  26,  46, 114, 150, 161, 248,  19,  53, 
 		95, 225,  56,  72, 216, 115, 149, 164, 247,   2,   6,  10,  30,  34, 102, 170, 
@@ -80,8 +78,6 @@ public class AES {
 		69, 207,  74, 222, 121, 139, 134, 145, 168, 227,  62,  66, 198,  81, 243,  14, 
 		18,  54,  90, 238,  41, 123, 141, 140, 143, 138, 133, 148, 167, 242,  13,  23, 
 		57,  75, 221, 124, 132, 151, 162, 253,  28,  36, 108, 180, 199,  82, 246,   1};
-
-
 	public static int[][] rcon = {
 		{0x01, 00, 00, 00}, {0x02, 00, 00, 00}, {0x04, 00, 00, 00}, {0x08, 00, 00, 00}, 
 		{0x10, 00, 00, 00}, {0x20, 00, 00, 00}, {0x40, 00, 00, 00}, {0x80, 00, 00, 00}, 
@@ -267,16 +263,31 @@ public class AES {
 
 				int col = 0;
 				int row = 0;
-				for (int i = 0; line != null && i<line.length(); i=i +2)
+				
+				if (line.length() > 64)
+				{
+					System.out.println("This line has too many characters. Moving on.");
+					line = in.readLine();
+					continue;
+				}
+				
+				for (int i = 0; line != null && i<line.length()-1; i=i +2)
 				{
 					if (row == 4)
 					{
 						row = 0;
 						col++;
 					}
-					int hex = Integer.decode("0x"+line.substring(i,i+2));
+					int hex;
+					try {
+						hex = Integer.decode("0x"+line.substring(i,i+2));
+						making[row][col] = hex;
+					} catch (NumberFormatException e) {
+						System.out.println("MISFORMATTED TEXT ERROR ON "+ line.substring(i,i+2));
+						System.exit(1);
+					}
 
-					making[row][col] = hex;
+					
 					row++; 
 				}
 				line = in.readLine();
@@ -307,14 +318,14 @@ public class AES {
 			}
 		}
 		System.out.println(); 
-		//		for (int i = 0; i<matrix.length; i++)
-		//		{
-		//			for (int j =0; j<matrix[i].length; j++)
-		//			{
-		//				System.out.print(Integer.toHexString(matrix[i][j])+ " ");
-		//			}
-		//			System.out.println();
-		//		}
+//				for (int i = 0; i<matrix.length; i++)
+//				{
+//					for (int j =0; j<matrix[i].length; j++)
+//					{
+//						System.out.print(Integer.toHexString(matrix[i][j])+ " ");
+//					}
+//					System.out.println();
+//				}
 	}
 	//subBytes
 	public static void subBytes(){
@@ -380,6 +391,48 @@ public class AES {
 		cryptMatrix[3][1]= temp1;
 		cryptMatrix[3][2]= temp2;
 		cryptMatrix[3][3]= temp3;
+
+	}
+	public static void inverseShiftRows(){
+
+		//temporary variables with number indicating original column
+		int temp1=0;
+		int temp2=0;
+		int temp3=0;
+		int temp4=0;
+
+		//first row stays the same
+		//second row: 2nd to 1st, 3rd to 2nd, 4th to 3rd, 1st goes to 4th
+		temp1=cryptMatrix[1][0];
+		temp2=cryptMatrix[1][1];
+		temp3=cryptMatrix[1][2];
+		temp4=cryptMatrix[1][3];
+		cryptMatrix[1][0]= temp4;
+		cryptMatrix[1][1]= temp1;
+		cryptMatrix[1][2]= temp2;
+		cryptMatrix[1][3]= temp3;
+
+
+		//third row: 3rd to 1st, 4th to 2nd, 1st to 3rd, 2nd to 4th
+		temp1=cryptMatrix[2][0];
+		temp2=cryptMatrix[2][1];
+		temp3=cryptMatrix[2][2];
+		temp4=cryptMatrix[2][3];
+		cryptMatrix[2][0]= temp3;
+		cryptMatrix[2][1]= temp4;
+		cryptMatrix[2][2]= temp1;
+		cryptMatrix[2][3]= temp2;
+
+
+		//fourth row: 1st to 2nd, 2nd to 3rd, 3rd to 4th,
+		temp1=cryptMatrix[3][0];
+		temp2=cryptMatrix[3][1];
+		temp3=cryptMatrix[3][2];
+		temp4=cryptMatrix[3][3];
+		cryptMatrix[3][0]= temp2;
+		cryptMatrix[3][1]= temp3;
+		cryptMatrix[3][2]= temp4;
+		cryptMatrix[3][3]= temp1;
 
 	}
 
