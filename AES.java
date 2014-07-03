@@ -132,26 +132,40 @@ public class AES {
 		{0xe8, 00, 00, 00}, {0xcb, 00, 00, 00}, {0x8d, 00, 00, 00}};
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 
 		cryptMatrix = setUpArray(args[2], 4); 
+		int[][] cipher = setUpArray (args[1], 8);
 		roundKey = setUpArray (args[1], 16*4);
 
 		//java AES option keyFile inputFile
 		System.out.println("Original Matrix:"); 
 		printMatrix(cryptMatrix);
 		System.out.println(); 
-
-		System.out.println("Freda - fix this"); 
-		System.out.println("Original RoundKey: ");
-		printMatrix(roundKey); 
+ 
+		System.out.println("Original CipherKey: ");
+		printMatrix(cipher); 
 		System.out.println(); 
 
 		int i = 0; 
 		keyIdx = 8;
 
 		while (i < 14){
-			updateRoundKey(); 
+			updateRoundKey();
+			for (int h = 0; h<roundKey.length; h++)
+			{
+				for (int j =0; j<roundKey[h].length; j++)
+				{
+					String aHex = Integer.toHexString(roundKey[h][j]); 
+					if (aHex.length() == 1) aHex = "0"+ aHex; 
+					System.out.print(aHex + " ");
+					
+
+					if (((j+1)%4) == 0) System.out.print(" "); 
+				}
+				System.out.println();
+			}
+			System.out.println();
+			
 			i++; 
 		}
 
@@ -174,7 +188,7 @@ public class AES {
 		keyIdx =0;
 		i = 1; 
 
-		System.out.println("After addRoundKey(" + i+ ")"); 
+		System.out.println("After addRoundKey(" + 0+ ")"); 
 		addRoundKey(); 
 		printMatrix(cryptMatrix); 
 		System.out.println(); 
@@ -436,7 +450,7 @@ public class AES {
 
 	//updates the RoundKey
 	public static void updateRoundKey(){
-		//word = last column
+		//word = last column "used"
 		//rotate word
 		int[] rotWord = rotateWord(); 
 
@@ -447,16 +461,19 @@ public class AES {
 		//then XOR next column with result
 		int[] rconWord = rcon[rconIdx]; 
 
-		for (int i = keyIdx; i < keyIdx+4; i++){
+		for (int i = keyIdx; i < keyIdx+8; i++){
 			for (int j = 0; j < roundKey.length; j++){
-				if (i == keyIdx)  roundKey[j][i] = roundKey[j][i] ^ rotWord[j] ^ rconWord[j];
-				else roundKey[j][i] = roundKey[j][i] ^ rotWord[j]; 
+				System.out.println(" i is " + i + " j is " + j + " value is " + Integer.toHexString(roundKey[j][i-8]));
+				if (i == keyIdx)  roundKey[j][i] = roundKey[j][i-8] ^ rotWord[j] ^ rconWord[j];
+				else roundKey[j][i] = roundKey[j][i-8] ^ rotWord[j]; 
 				rotWord[j] = roundKey[j][i];  
 			} 
 		}
+		
 		rconIdx++; 
 		if (rconIdx == rcon.length) rconIdx = 0; 
-		keyIdx += 4;
+		
+		keyIdx += 4;		//increment to next block in array
 	}
 
 	private static int[] subBytesWord(int[] rotWord) {
@@ -466,8 +483,11 @@ public class AES {
 		{
 			int firstdigit = (rotWord[row]>>4)&0xF;
 			int lastdigit = rotWord[row]&0xF;
+			
+			System.out.print("first " + firstdigit + " last " + lastdigit); 
 
 			rotWord[row] = sBox[firstdigit][lastdigit]; 
+			System.out.println(" " +Integer.toHexString(rotWord[row]));
 			row++; 
 		}
 		return rotWord;
@@ -476,18 +496,12 @@ public class AES {
 	private static int[] rotateWord(){
 		int[] rotWord = new int[4];
  
+		//get last word used in last block
+		//rotate top item to bottom.
 		for (int i = 0; i < 4; i++) {
-			//System.out.println("length: " + roundKey.length + " keyIdx " + keyIdx + " total " + (i + 1 + keyIdx)); 
 			if (i <3) rotWord[i] = roundKey[i+1][keyIdx-1]; 
 			else rotWord[i] = roundKey[0][keyIdx-1]; 
-			
-			 //rotWord[i] = roundKey[i][3+keyIdx-4]; 
 		}
-		
-		for (int i = 0; i < rotWord.length; i++) {
-			System.out.print(Integer.toHexString(rotWord[i]) + " ");
-		}
-		System.out.println();
 
 		return rotWord; 
 	}
