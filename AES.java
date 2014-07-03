@@ -1,5 +1,4 @@
 import java.io.*;
-import java.util.Arrays;
 
 
 public class AES {
@@ -135,13 +134,13 @@ public class AES {
 
 		cryptMatrix = setUpArray(args[2], 4); 
 		int[][] cipher = setUpArray (args[1], 8);
-		roundKey = setUpArray (args[1], 16*4);
+		roundKey = setUpArray (args[1], 15*4);
 
 		//java AES option keyFile inputFile
 		System.out.println("Original Matrix:"); 
 		printMatrix(cryptMatrix);
 		System.out.println(); 
- 
+
 		System.out.println("Original CipherKey: ");
 		printMatrix(cipher); 
 		System.out.println(); 
@@ -149,27 +148,11 @@ public class AES {
 		int i = 0; 
 		keyIdx = 8;
 
-		while (i < 14){
+		while (keyIdx < roundKey[0].length){
 			updateRoundKey();
-			for (int h = 0; h<roundKey.length; h++)
-			{
-				for (int j =0; j<roundKey[h].length; j++)
-				{
-					String aHex = Integer.toHexString(roundKey[h][j]); 
-					if (aHex.length() == 1) aHex = "0"+ aHex; 
-					System.out.print(aHex + " ");
-					
-
-					if (((j+1)%4) == 0) System.out.print(" "); 
-				}
-				System.out.println();
-			}
-			System.out.println();
-			
-			i++; 
 		}
 
-		System.out.println("New RoundKey Generated: "); 
+		System.out.println("RoundKey Expanded: "); 
 		for (i = 0; i<roundKey.length; i++)
 		{
 			for (int j =0; j<roundKey[i].length; j++)
@@ -177,7 +160,7 @@ public class AES {
 				String aHex = Integer.toHexString(roundKey[i][j]); 
 				if (aHex.length() == 1) aHex = "0"+ aHex; 
 				System.out.print(aHex + " ");
-				
+
 
 				if (((j+1)%4) == 0) System.out.print(" "); 
 			}
@@ -193,8 +176,7 @@ public class AES {
 		printMatrix(cryptMatrix); 
 		System.out.println(); 
 
-		while (i < 14) {
-			//System.out.println( "New Round " +(i + 1)); 
+		while (i < 14) { 
 			runRounds(i);
 			i++; 
 		} 
@@ -214,7 +196,7 @@ public class AES {
 		addRoundKey(); 
 		printMatrix(cryptMatrix); 
 		System.out.println();
-		
+
 		System.out.println("The Cipher Text: "); 
 		for (i = 0; i<cryptMatrix.length; i++)
 		{
@@ -227,7 +209,7 @@ public class AES {
 			System.out.println();
 		}
 		System.out.println();
-		
+
 	}
 
 	private static void runRounds(int i) {
@@ -450,30 +432,38 @@ public class AES {
 
 	//updates the RoundKey
 	public static void updateRoundKey(){
-		//word = last column "used"
+		//word = last column "used" - col 3, 7, 11...
 		//rotate word
-		int[] rotWord = rotateWord(); 
+		int[] rotWord = new int[4];
+		if (keyIdx%8 ==0)
+			rotWord = rotateWord(); 
+		else{
+			for (int help = 0; help < 4; help++){
+				rotWord[help] = roundKey[help][keyIdx-1]; 
+			}}
 
 		//subbytes word
 		rotWord = subBytesWord(rotWord);
 
-		//XOR first column with word and RCON
+		//XOR first column (0,with word and RCON
 		//then XOR next column with result
 		int[] rconWord = rcon[rconIdx]; 
-
-		for (int i = keyIdx; i < keyIdx+8; i++){
+		int end = (keyIdx+8 > roundKey[0].length) ? keyIdx+4 : keyIdx+8; 
+		
+		for (int i = keyIdx; i < end; i++){
 			for (int j = 0; j < roundKey.length; j++){
-				System.out.println(" i is " + i + " j is " + j + " value is " + Integer.toHexString(roundKey[j][i-8]));
+				if (i == keyIdx+4 && j ==0){rotWord = subBytesWord(rotWord);}
+
 				if (i == keyIdx)  roundKey[j][i] = roundKey[j][i-8] ^ rotWord[j] ^ rconWord[j];
 				else roundKey[j][i] = roundKey[j][i-8] ^ rotWord[j]; 
 				rotWord[j] = roundKey[j][i];  
 			} 
 		}
-		
+
 		rconIdx++; 
 		if (rconIdx == rcon.length) rconIdx = 0; 
-		
-		keyIdx += 4;		//increment to next block in array
+
+		keyIdx += 8;		//increment to next block in array
 	}
 
 	private static int[] subBytesWord(int[] rotWord) {
@@ -483,11 +473,8 @@ public class AES {
 		{
 			int firstdigit = (rotWord[row]>>4)&0xF;
 			int lastdigit = rotWord[row]&0xF;
-			
-			System.out.print("first " + firstdigit + " last " + lastdigit); 
 
 			rotWord[row] = sBox[firstdigit][lastdigit]; 
-			System.out.println(" " +Integer.toHexString(rotWord[row]));
 			row++; 
 		}
 		return rotWord;
@@ -495,7 +482,7 @@ public class AES {
 
 	private static int[] rotateWord(){
 		int[] rotWord = new int[4];
- 
+
 		//get last word used in last block
 		//rotate top item to bottom.
 		for (int i = 0; i < 4; i++) {
