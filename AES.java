@@ -135,24 +135,58 @@ public class AES {
 		// TODO Auto-generated method stub
 
 		cryptMatrix = setUpArray(args[2], 4); 
-		roundKey = setUpArray (args[1], 8); 
+		roundKey = setUpArray (args[1], 16*4);
+
 		//java AES option keyFile inputFile
 		System.out.println("Original Matrix:"); 
 		printMatrix(cryptMatrix);
 		System.out.println(); 
 
+		System.out.println("Freda - fix this"); 
 		System.out.println("Original RoundKey: ");
 		printMatrix(roundKey); 
 		System.out.println(); 
 
 		int i = 0; 
-		while (i < 13) {
-			System.out.println( "New Round " +(i + 1)); 
-			runRounds();
+		keyIdx = 8;
+
+		while (i < 14){
+			updateRoundKey(); 
+			i++; 
+		}
+
+		System.out.println("New RoundKey Generated: "); 
+		for (i = 0; i<roundKey.length; i++)
+		{
+			for (int j =0; j<roundKey[i].length; j++)
+			{
+				String aHex = Integer.toHexString(roundKey[i][j]); 
+				if (aHex.length() == 1) aHex = "0"+ aHex; 
+				System.out.print(aHex + " ");
+				
+
+				if (((j+1)%4) == 0) System.out.print(" "); 
+			}
+			System.out.println();
+		}
+		System.out.println();
+
+		keyIdx =0;
+		i = 1; 
+
+		System.out.println("After addRoundKey(" + i+ ")"); 
+		addRoundKey(); 
+		printMatrix(cryptMatrix); 
+		System.out.println(); 
+
+		while (i < 14) {
+			//System.out.println( "New Round " +(i + 1)); 
+			runRounds(i);
 			i++; 
 		} 
 
-		System.out.println("SubByters Results: " );
+
+		System.out.println("SubBytes Results: " );
 		subBytes();
 		printMatrix(cryptMatrix);
 		System.out.println(); 
@@ -162,18 +196,28 @@ public class AES {
 		printMatrix(cryptMatrix);
 		System.out.println(); 
 
-		System.out.println("Add Round Key Results: " );
+		System.out.println("After addRoundKey(" + (i)+ ")");
 		addRoundKey(); 
 		printMatrix(cryptMatrix); 
 		System.out.println();
-
-		System.out.println("New RoundKey Generated: "); 
-		printMatrix(roundKey); 
-		System.out.println(); 
+		
+		System.out.println("The Cipher Text: "); 
+		for (i = 0; i<cryptMatrix.length; i++)
+		{
+			for (int j =0; j<cryptMatrix[i].length; j++)
+			{
+				String aHex = Integer.toHexString(cryptMatrix[j][i]); 
+				if (aHex.length() == 1) aHex = "0"+ aHex; 
+				System.out.print(aHex + " ");
+			}
+			System.out.println();
+		}
+		System.out.println();
+		
 	}
 
-	private static void runRounds() {
-		System.out.println("SubByters Results: " );
+	private static void runRounds(int i) {
+		System.out.println("SubBytes Results: " );
 		subBytes();
 		printMatrix(cryptMatrix);
 		System.out.println(); 
@@ -188,14 +232,14 @@ public class AES {
 		printMatrix(cryptMatrix); 
 		System.out.println(); 
 
-		System.out.println("Add Round Key Results: " );
+		System.out.println("After addRoundKey(" + i+ ")");
 		addRoundKey(); 
 		printMatrix(cryptMatrix); 
 		System.out.println();
 
-		System.out.println("New RoundKey Generated: "); 
-		printMatrix(roundKey); 
-		System.out.println(); 
+		//		System.out.println("New RoundKey Generated: "); 
+		//		printMatrix(roundKey); 
+		//		System.out.println(); 
 	}
 
 	private static int[][] setUpArray(String file, int size) {
@@ -238,23 +282,25 @@ public class AES {
 	//print matrix
 	//used for debugging purposes
 	public static void printMatrix (int[][] matrix) {
-		
+
 		for (int i = 0; i<matrix[0].length; i++)
 		{
 			for (int j =0; j<matrix.length; j++)
 			{
-				System.out.print(Integer.toHexString(matrix[j][i]));
+				String aHex = Integer.toHexString(matrix[j][i]); 
+				if (aHex.length() == 1) aHex = "0"+ aHex; 
+				System.out.print(aHex);
 			}
 		}
 		System.out.println(); 
-//		for (int i = 0; i<matrix.length; i++)
-//		{
-//			for (int j =0; j<matrix[i].length; j++)
-//			{
-//				System.out.print(Integer.toHexString(matrix[i][j])+ " ");
-//			}
-//			System.out.println();
-//		}
+		//		for (int i = 0; i<matrix.length; i++)
+		//		{
+		//			for (int j =0; j<matrix[i].length; j++)
+		//			{
+		//				System.out.print(Integer.toHexString(matrix[i][j])+ " ");
+		//			}
+		//			System.out.println();
+		//		}
 	}
 	//subBytes
 	public static void subBytes(){
@@ -378,15 +424,14 @@ public class AES {
 
 	//addRoundKey
 	public static void addRoundKey(){
-		updateRoundKey(); 
+
 		for (int i = 0; i < cryptMatrix[0].length; i++){
 			for (int j = 0; j < cryptMatrix.length; j++){
 				cryptMatrix[j][i] = cryptMatrix[j][i] ^ roundKey[j][i+keyIdx]; 
 			} 
 		}
 
-
-
+		keyIdx +=4; 
 	}
 
 	//updates the RoundKey
@@ -404,13 +449,14 @@ public class AES {
 
 		for (int i = keyIdx; i < keyIdx+4; i++){
 			for (int j = 0; j < roundKey.length; j++){
-				if (i == 0) roundKey[j][i] = roundKey[j][i] ^ rotWord[j] ^ rconWord[j];
+				if (i == keyIdx)  roundKey[j][i] = roundKey[j][i] ^ rotWord[j] ^ rconWord[j];
 				else roundKey[j][i] = roundKey[j][i] ^ rotWord[j]; 
 				rotWord[j] = roundKey[j][i];  
 			} 
 		}
 		rconIdx++; 
-		keyIdx = (keyIdx == 0) ? 4:0;
+		if (rconIdx == rcon.length) rconIdx = 0; 
+		keyIdx += 4;
 	}
 
 	private static int[] subBytesWord(int[] rotWord) {
@@ -429,11 +475,19 @@ public class AES {
 
 	private static int[] rotateWord(){
 		int[] rotWord = new int[4];
-
-		for (int i = keyIdx; i < roundKey.length; i++) {
-			if (i <3) rotWord[i] = roundKey[i+1][3]; 
-			else rotWord[i] = roundKey[0][3]; 
+ 
+		for (int i = 0; i < 4; i++) {
+			//System.out.println("length: " + roundKey.length + " keyIdx " + keyIdx + " total " + (i + 1 + keyIdx)); 
+			if (i <3) rotWord[i] = roundKey[i+1][keyIdx-1]; 
+			else rotWord[i] = roundKey[0][keyIdx-1]; 
+			
+			 //rotWord[i] = roundKey[i][3+keyIdx-4]; 
 		}
+		
+		for (int i = 0; i < rotWord.length; i++) {
+			System.out.print(Integer.toHexString(rotWord[i]) + " ");
+		}
+		System.out.println();
 
 		return rotWord; 
 	}
