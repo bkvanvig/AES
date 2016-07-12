@@ -30,7 +30,7 @@ AES-256
 128-bit input  
 256-bit key  
 14 rounds  
-* if file contains:  
+if file contains:  
 -non-hex characters, skip
 -less than 64 characters, pad with 0’s on the right
 
