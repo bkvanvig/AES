@@ -32,7 +32,8 @@ AES-256
 14 rounds  
 if file contains:  
 * non-hex characters, skip  
-* less than 64 characters, pad with 0’s on the right  
+* less than 64 characters, pad with 0’s on the right
+
 Measure how many Mb/sec you can encrypt and then how many you can decrypt. Compare speeds  
 
 ##Rounds
