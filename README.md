@@ -1,6 +1,8 @@
 AES Crypto
 
+
 Semantics
+
 
 File named AES.java
 
@@ -17,6 +19,7 @@ inputFile is a file containing lines of plaintext
 
 Algorithm steps
 
+
 subBytes: for each byte in the array, use it’s value as an index into a fixed element lookup table (available online) and replace it’s value with the value at index on table.
 
 shiftRows: for Ri (row i in table) shift i bytes. Circular shifts. Do not affect the bytes themselves
@@ -27,13 +30,22 @@ addRoundkey: XOR the state with 128-bit round key derived from the original key 
 
 Assignment
 
+
 AES-256
+
 128-bit input
+
 256-bit key
+
 14 rounds
+
+
 if file contains:
-non-hex characters, skip
-less than 64 characters, pad with 0’s on the right
+-non-hex characters, skip
+-less than 64 characters, pad with 0’s on the right
+
 Measure how many Mb/sec you can encrypt and then how many you can decrypt. Compare speeds
+
 Rounds
+
 Do all four steps rounds 1-9, 10th ignore mix columns
